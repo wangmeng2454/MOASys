@@ -3,9 +3,9 @@ server:
     threads:
       acceptors: 4
       selectors: 8
-  port: 9090
+  port: 8090
   servlet:
-    context-path: /emos-workflow
+    context-path: /emos-api
     multipart:
       max-request-size: 10MB
       max-file-size: 2MB
@@ -22,8 +22,8 @@ spring:
       max-active: 4
       min-idle: 4
       max-wait: 60000
-      test-while-idle: false
-      test-on-borrow: true
+      test-while-idle: true
+      test-on-borrow: false
       test-on-return: false
   redis:
     database: 0
@@ -36,35 +36,74 @@ spring:
         max-wait: -1ms
         max-idle: 16
         min-idle: 8
-  activiti:
-    database-schema-update: true
-    historyLevel: audit
-    db-history-used: true
-  quartz:
-    job-store-type: jdbc
-  mail:
-    default-encoding: UTF-8
-    host: 你的邮件服务器SMTP网关
-    username: 你的邮箱账户名
-    password: 你的邮箱密码
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: emos
+      authentication-database: admin
+      username: admin
+      password: abc123456
+
+sa-token:
+  #token名称 (同时也是cookie名称)
+  token-name: token
+  # token有效期，单位s 默认30天, -1代表永不过期
+  timeout: 2592000
+  # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒
+  activity-timeout: -1
+  # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
+  allow-concurrent-login: true
+  # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
+  is-share: false
+  # token风格
+  token-style: uuid
+  #关闭读取Cookie中Token
+  isReadCookie: true
+
+
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
-  type-aliases-package: com.example.emos.workflow.db.pojo
+  type-aliases-package: com.example.emos.api.db.pojo
   configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
 logging:
   level:
     root: info
-    com.example.demo.workflow.db.dao : error
+    com.example.emos.api.db.dao: warn
   pattern:
-    console: "%d{HH:mm:ss}  %-5level  %msg%n"
+    console: "%d{yyyy/MM/dd HH:mm:ss}  %-5level  %msg%n"
 
+springdoc:
+  api-docs:
+    enabled: true
+    path: /doc-api.html
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: on
 tencent:
   cloud:
-    appId: 腾讯云COS的APPID
-    secretId: 腾讯云COS的SecretId
-    secretKey: 腾讯云COS的SecretKey
-    region: 存储桶位置
-    bucket: 存储桶名称
+    appId: 腾讯云APPID
+    secretId: 腾讯云SecretId
+    secretKey: 腾讯云SecretKey
+    region: 存储桶地域名称
+    bucket: 存储桶名字
+  trtc:
+    appId: TRTC的APPID
+    secretKey: TRTC的密钥
+    expire: 86400
+wx:
+  app-id: 微信小程序APPID
+  app-secret: 微信小程序密钥
+  mch-id: 微信支付商户号
+  key: 微信支付密钥
+  cert-path: 微信支付数字证书文件路径
+emos:
+  code: 慕课网授权码
+  tcode: "课程授权码"
+  recieveNotify: http://你电脑的IP地址:8090/emos-api/meeting/recieveNotify
+workflow:
+  url: http://你电脑的IP地址:9090/emos-workflow
